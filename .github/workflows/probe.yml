@@ -1,0 +1,17 @@
+name: Probe map services
+on:
+  push:
+    branches: [probe-hydro]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for u in \
+            "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer?f=json" \
+            "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer/tile/6/24/10" \
+            "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer/tile/12/1582/655" \
+            "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer?f=json" \
+            "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/12/1582/655" ; do
+            echo "== $u"; curl -sS -o out -w "%{http_code} %{content_type} %{size_download}\n" -H "Referer: https://adso-of-melk.github.io/" "$u"; head -c 300 out | tr -c '[:print:]\n' '.'; echo
+          done
