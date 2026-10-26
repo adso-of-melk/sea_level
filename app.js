@@ -220,4 +220,6 @@ panelToggle.addEventListener("click", () => {
   const collapsed = panel.classList.toggle("collapsed");
   panelToggle.setAttribute("aria-expanded", String(!collapsed));
 });
-if (window.matchMedia("(max-width: 600px)").matches) panelToggle.click();
+// Start with the options hidden on phones and tablets, where they would cover
+// much of the map. The title button brings them back.
+if (window.matchMedia("(max-width: 900px), (max-height: 600px)").matches) panelToggle.click();
