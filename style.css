@@ -22,25 +22,40 @@ html, body, #globe {
 }
 
 #panel-toggle {
-  display: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   width: 100%;
   padding: 10px 12px;
   background: none;
   border: 0;
   color: inherit;
   font: inherit;
+  font-size: 16px;
   font-weight: 600;
   text-align: left;
   cursor: pointer;
 }
 
-#panel-body {
-  padding: 12px 14px 14px;
+/* A small arrow: down while the options are open, right while they're hidden. */
+#panel-toggle .chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
 }
 
-#panel h1 {
-  margin: 0 0 10px;
-  font-size: 16px;
+#panel.collapsed { width: auto; }
+#panel.collapsed #panel-body { display: none; }
+#panel.collapsed #panel-toggle .chevron { transform: rotate(-45deg); }
+
+/* A long panel scrolls inside itself rather than running off the screen. */
+#panel-body {
+  padding: 2px 14px 14px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
 #panel fieldset {
@@ -71,12 +86,9 @@ html, body, #globe {
   font-size: 12px;
 }
 
-/* On phones the panel folds up behind its button so the globe has room. */
+/* On phones, leave room for the buttons and compass on the right. */
 @media (max-width: 600px) {
   #panel { max-width: calc(100% - 150px); }
-  #panel-toggle { display: block; }
-  #panel-body { padding-top: 0; }
-  #panel.collapsed #panel-body { display: none; }
 }
 
 /* Compass, under Cesium's buttons in the top right corner. */
