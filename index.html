@@ -35,6 +35,27 @@
     </div>
   </aside>
 
+  <div id="compass">
+    <div id="compass-dial" role="button" tabindex="0" aria-label="Compass: drag to turn the map, click to face north">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="31" class="compass-face"/>
+        <g id="compass-rose">
+          <polygon points="32,15 37,32 27,32" class="needle-north"/>
+          <polygon points="32,49 37,32 27,32" class="needle-south"/>
+          <text x="32" y="11.5" class="compass-n">N</text>
+          <text x="56" y="35.5">E</text>
+          <text x="32" y="60">S</text>
+          <text x="8" y="35.5">W</text>
+        </g>
+      </svg>
+    </div>
+    <div id="compass-turns">
+      <button id="turn-left" type="button" aria-label="Turn left" title="Turn left">&#x21BA;</button>
+      <button id="turn-right" type="button" aria-label="Turn right" title="Turn right">&#x21BB;</button>
+    </div>
+  </div>
+
   <script src="app.js"></script>
+  <script src="compass.js"></script>
 </body>
 </html>
