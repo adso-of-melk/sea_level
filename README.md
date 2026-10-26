@@ -14,8 +14,9 @@ water can find a way in.
 - A sea level slider from 0 to 70 m in 10 cm steps, or type a level. Water only
   reaches places the sea could actually flow to, and is shaded darker where it
   is deeper. Flooding is worked out from Washington to Baja California.
+  0 m is today's average daily high tide.
 
-Coming next: high-detail coastal data, and rivers and lakes.
+Coming next: rivers and lakes.
 
 ## Using it
 
@@ -57,6 +58,17 @@ attaches the tiles to the `flood-data` release. The **Publish site** workflow
 adds those tiles when it publishes the app to GitHub Pages, so they never need
 to be stored in the repository itself.
 
-Elevation is the Copernicus GLO-30 surface model (about 30 m), which measures
-the top of trees and buildings, so flooding in forests and cities can appear a
-little late. High-detail bare-ground coastal data is planned.
+Elevation inside the US is the USGS 3DEP bare-earth model (about 10 m), which
+leaves out trees and buildings. It is stepped down to about 30 m by keeping the
+highest point of each 3 x 3 block, so levees and sea walls still hold water
+back (very narrow creeks can be closed off the same way). Mexico and any gaps
+use the Copernicus GLO-30 surface model (about 30 m), which measures the top of
+trees and buildings, so flooding there can appear a little late.
+
+Heights are measured from mean higher high water, the average daily high tide,
+as in NOAA's Sea Level Rise Viewer. How far that tide sits above each model's
+zero is read from 16 NOAA tide stations from San Diego to Seattle and blended
+smoothly between them.
+
+Builds from branches other than `main` publish to a separate
+`flood-data-test` release, so they can be checked without changing the site.

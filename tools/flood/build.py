@@ -57,6 +57,10 @@ LOW_DM = -1000          # elevations below -100 m are stored as -100 m
 OCEAN_TILE = -2
 HIGH_TILE = -1
 NEVER = 65535           # tile pixel value: never floods within the slider range
+# Ground the sea already covers at high tide is drawn as water from level 0
+# if it is no more than this far below high tide (beaches, mudflats, marsh).
+# Anything deeper is open water, which the base map already shows.
+TIDAL_LAND_DM = -5
 
 # US west coast, Baja California to Washington, plus the head of the Gulf of
 # California (the Salton basin connects to the sea through it).
@@ -486,10 +490,12 @@ def _sample(elevation, flood_level, tile_index, rows, cols, k, out_level, out_gr
                     if slot < 0:
                         continue
                     level = flood_level[slot, r % CELLS, c % CELLS]
-                    # Level 0 is today's sea, which the base map already shows.
-                    if level >= 1 and level < best:
+                    ground = elevation[slot, r % CELLS, c % CELLS]
+                    if level < 0 or (level == 0 and ground < TIDAL_LAND_DM):
+                        continue
+                    if level < best:
                         best = level
-                        best_ground = elevation[slot, r % CELLS, c % CELLS]
+                        best_ground = ground
             out_level[y, x] = best
             out_ground[y, x] = min(255, max(0, (best_ground + 500) // 5))
             if best != NEVER:

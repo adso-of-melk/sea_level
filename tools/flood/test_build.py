@@ -180,3 +180,27 @@ def test_tide_gap_falls_back_without_stations():
 def test_noaa_datum_replies_are_read_in_either_shape():
     assert build._datum_values({"datums": [{"name": "MHHW", "value": 1.5}, {"name": "NAVD88", "value": None}]}) == {"MHHW": 1.5}
     assert build._datum_values({"datums": [{"n": "MSL", "v": "0.95"}]}) == {"MSL": 0.95}
+
+
+def test_land_under_high_tide_is_drawn_but_open_water_is_not(tmp_path):
+    folder = tmp_path / "dem"
+    folder.mkdir()
+    land = np.full((build.CELLS, build.CELLS), 3.0)
+    land[:, :100] = -3.0      # open water
+    land[:, 100:200] = -0.2   # a beach that high tide covers
+    write_tile(folder, 0, -1, land)
+    tile_index, elevation = build.load_elevation((-1, 0, 0, 1), str(folder))
+    flood_level = build.compute_flood_levels(tile_index, elevation)
+    out = tmp_path / "out"
+    build.write_tiles(tile_index, elevation, flood_level, (-1, 0, 0, 1), out, 11, 11)
+
+    def pixel(lat, lon):
+        size = 180 / 2 ** 11
+        x, y = int((lon + 180) // size), int((90 - lat) // size)
+        px, py = int(((lon + 180) / size - x) * 256), int(((90 - lat) / size - y) * 256)
+        with rasterio.open(out / "11" / str(x) / f"{y}.png") as png:
+            r, g, _ = (band[py, px] for band in png.read())
+        return int(r) * 256 + int(g)
+
+    assert pixel(0.5, -1 + 150 / 3600) == 0
+    assert pixel(0.5, -1 + 50 / 3600) == build.NEVER
