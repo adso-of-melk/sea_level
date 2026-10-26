@@ -1,0 +1,63 @@
+# Downloads elevation data, works out flood levels and publishes the map
+# tiles for the sea level slider as an asset on the "flood-data" release.
+# Run it from the Actions tab ("Run workflow") whenever the data should be rebuilt.
+name: Build flood data
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [sea-level-slider]
+    paths: ["tools/flood/**", ".github/workflows/flood-data.yml"]
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: flood-data
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: pip install -r tools/flood/requirements.txt
+
+      - name: Test the flood calculation
+        working-directory: tools/flood
+        run: python -m pytest -q
+
+      - name: Build flood tiles
+        env:
+          GDAL_HTTP_MAX_RETRY: "5"
+          GDAL_HTTP_RETRY_DELAY: "2"
+          GDAL_DISABLE_READDIR_ON_OPEN: EMPTY_DIR
+          CPL_VSIL_CURL_ALLOWED_EXTENSIONS: .tif
+        run: |
+          python tools/flood/build.py --out flood
+          du -sh flood
+          find flood -name '*.png' | wc -l
+
+      - name: Publish tiles to the flood-data release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tar -czf flood-tiles.tar.gz flood
+          gh release view flood-data >/dev/null 2>&1 || gh release create flood-data \
+            --title "Flood map data" --latest=false \
+            --notes "Map tiles for the sea level slider, made by the Build flood data workflow."
+          gh release upload flood-data flood-tiles.tar.gz flood/meta.json --clobber
+
+      - name: Republish the site with the new tiles
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
