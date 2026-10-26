@@ -117,6 +117,66 @@ def test_meta_written_by_main(tmp_path):
     land[:, :50] = 0.0  # sea along the west edge of the area
     write_tile(folder, 0, -1, land)
     build.main(["--source-dir", str(folder), "--out", str(tmp_path / "out"),
-                "--bounds", "-1", "0", "0", "1", "--min-zoom", "10", "--max-zoom", "10"])
+                "--bounds", "-1", "0", "0", "1", "--min-zoom", "10", "--max-zoom", "10",
+                "--tide-datum", "none"])
     meta = json.loads((tmp_path / "out" / "meta.json").read_text())
     assert meta["maxLevelDm"] == 700 and meta["tiles"]["10"] > 0
+
+
+# ---- Bare earth and tide datum ------------------------------------------------
+
+def write_usgs_tile(folder, lat, lon, metres, overlap=6):
+    """A 3DEP-style tile: named by its north-west corner, with a few cells of
+    overlap all round and -999999 where there is no data."""
+    n = metres.shape[0] + 2 * overlap
+    padded = np.full((n, n), -999999.0, np.float32)
+    padded[overlap:-overlap, overlap:-overlap] = np.where(np.isnan(metres), -999999.0, metres)
+    step = 1 / metres.shape[0]
+    profile = dict(driver="GTiff", width=n, height=n, count=1, dtype="float32", nodata=-999999.0,
+                   crs="EPSG:4269", transform=from_origin(lon - overlap * step, lat + 1 + overlap * step, step, step))
+    with rasterio.open(folder / f"{build.usgs_name(lat, lon)}.tif", "w", **profile) as dst:
+        dst.write(padded, 1)
+
+
+def test_max_pool_keeps_narrow_levees_and_skips_gaps():
+    grid = np.zeros((6, 6), np.float32)
+    grid[:, 1] = 4.0          # a levee one cell wide
+    grid[3:, 3:] = np.nan     # a gap in the data
+    grid[5, 5] = 2.0
+    pooled = build.max_pool(grid, 3)
+    assert pooled.tolist() == [[4.0, 0.0], [4.0, 2.0]]
+
+
+def test_bare_earth_replaces_surface_model_and_heights_start_at_high_tide(tmp_path):
+    cop, usgs = tmp_path / "cop", tmp_path / "usgs"
+    cop.mkdir()
+    usgs.mkdir()
+    write_tile(cop, 1, -1, np.full((build.CELLS, build.CELLS), 5.0))
+    bare = np.full((build.CELLS, build.CELLS), 3.0, np.float32)
+    bare[:, :1800] = np.nan  # 3DEP stops halfway across, say at a border
+    write_usgs_tile(usgs, 1, -1, bare)
+
+    gaps = {"a": (1.5, -0.5, 1.0, 0.5)}  # MHHW 1.0 m above NAVD88, 0.5 m above MSL
+    datum = build.TideDatum(gaps)
+    tile_index, elevation = build.load_elevation((-1, 1, 0, 2), str(cop), str(usgs), datum)
+    tile = elevation[tile_index[0, 0]]
+    assert tile[100, 100] == 45    # Copernicus 5.0 m - 0.5 m
+    assert tile[100, 3000] == 20   # 3DEP 3.0 m - 1.0 m
+
+
+def test_tide_gap_follows_stations_and_tiles_meet_smoothly():
+    datum = build.TideDatum({"south": (32.0, -117.0, 1.6, 0.8), "north": (47.0, -122.0, 2.8, 1.4)})
+    assert datum.gap_at("navd88", 32.0, -117.0) == pytest.approx(1.6, abs=1e-3)
+    assert 1.6 < datum.gap_at("navd88", 40.0, -120.0) < 2.8
+    west = datum.gap_grid("msl", 40, -121)
+    east = datum.gap_grid("msl", 40, -120)
+    assert abs(west[1800, -1] - east[1800, 0]) < 1e-3
+
+
+def test_tide_gap_falls_back_without_stations():
+    assert build.TideDatum(fallback=(1.9, 0.9)).gap_at("navd88", 40, -120) == 1.9
+
+
+def test_noaa_datum_replies_are_read_in_either_shape():
+    assert build._datum_values({"datums": [{"name": "MHHW", "value": 1.5}, {"name": "NAVD88", "value": None}]}) == {"MHHW": 1.5}
+    assert build._datum_values({"datums": [{"n": "MSL", "v": "0.95"}]}) == {"MSL": 0.95}

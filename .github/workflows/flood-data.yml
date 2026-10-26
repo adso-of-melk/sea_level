@@ -6,7 +6,7 @@ name: Build flood data
 on:
   workflow_dispatch:
   push:
-    branches: [sea-level-slider]
+    branches: [bare-earth-elevation]
     paths: ["tools/flood/**", ".github/workflows/flood-data.yml"]
 
 permissions:
@@ -46,15 +46,19 @@ jobs:
           du -sh flood
           find flood -name '*.png' | wc -l
 
+      # Builds from main replace the live map's tiles. Builds from any other
+      # branch go to a separate "flood-data-test" release so they can be
+      # checked without changing the published site.
       - name: Publish tiles to the flood-data release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE: ${{ github.ref == 'refs/heads/main' && 'flood-data' || 'flood-data-test' }}
         run: |
           tar -czf flood-tiles.tar.gz flood
-          gh release view flood-data >/dev/null 2>&1 || gh release create flood-data \
-            --title "Flood map data" --latest=false \
+          gh release view "$RELEASE" >/dev/null 2>&1 || gh release create "$RELEASE" \
+            --title "Flood map data ($RELEASE)" --latest=false \
             --notes "Map tiles for the sea level slider, made by the Build flood data workflow."
-          gh release upload flood-data flood-tiles.tar.gz flood/meta.json --clobber
+          gh release upload "$RELEASE" flood-tiles.tar.gz flood/meta.json --clobber
 
       - name: Republish the site with the new tiles
         if: github.ref == 'refs/heads/main'
