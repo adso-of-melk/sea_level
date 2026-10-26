@@ -31,7 +31,12 @@
         <label><input type="checkbox" id="show-borders" checked> Borders</label>
       </fieldset>
 
-      <p class="note">Sea level slider coming in the next version.</p>
+      <fieldset>
+        <legend>Sea level rise</legend>
+        <input type="range" id="level-slider" min="0" max="70" step="0.1" value="0" aria-label="Sea level rise in metres">
+        <label class="level-box">Rise <input type="number" id="level-number" min="0" max="70" step="0.1" value="0.0" inputmode="decimal"> m</label>
+        <p class="note" id="flood-status">Loading flood data…</p>
+      </fieldset>
     </div>
   </aside>
 
@@ -57,5 +62,6 @@
 
   <script src="app.js"></script>
   <script src="compass.js"></script>
+  <script src="flood.js"></script>
 </body>
 </html>
