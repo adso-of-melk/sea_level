@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sea Level Globe</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.145.0/Build/Cesium/Widgets/widgets.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.145.0/Build/Cesium/Cesium.js"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+  <div id="globe"></div>
+
+  <aside id="panel">
+    <button id="panel-toggle" type="button" aria-expanded="true">Map options</button>
+    <div id="panel-body">
+      <h1>Sea Level Globe</h1>
+
+      <fieldset>
+        <legend>Base map</legend>
+        <label><input type="radio" name="base" value="relief" checked> Shaded relief</label>
+        <label><input type="radio" name="base" value="satellite"> Satellite</label>
+        <label><input type="radio" name="base" value="plain"> Plain</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Show on map</legend>
+        <label><input type="checkbox" id="show-cities" checked> City names</label>
+        <label><input type="checkbox" id="show-roads"> Roads</label>
+        <label><input type="checkbox" id="show-borders" checked> Borders</label>
+      </fieldset>
+
+      <p class="note">Sea level slider coming in the next version.</p>
+    </div>
+  </aside>
+
+  <script src="app.js"></script>
+</body>
+</html>
