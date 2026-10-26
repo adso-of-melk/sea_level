@@ -42,7 +42,7 @@ Map data:
 | --- | --- |
 | Terrain, satellite | Cesium ion (Cesium World Terrain, Bing Maps) |
 | Shaded relief, roads | Esri World Hillshade and World Transportation |
-| City names | CARTO labels, OpenStreetMap contributors |
+| City names | [Natural Earth](https://www.naturalearthdata.com/) populated places, made into `data/places.json` by `tools/make_places.mjs` |
 | Country borders | Natural Earth via [world-atlas](https://github.com/topojson/world-atlas) |
 | US state borders | US Census via [us-atlas](https://github.com/topojson/us-atlas) |
 
