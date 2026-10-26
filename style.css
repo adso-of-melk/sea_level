@@ -78,3 +78,65 @@ html, body, #globe {
   #panel-body { padding-top: 0; }
   #panel.collapsed #panel-body { display: none; }
 }
+
+/* Compass, under Cesium's buttons in the top right corner. */
+#compass {
+  position: absolute;
+  top: 52px;
+  right: 10px;
+  width: 72px;
+  z-index: 10;
+  user-select: none;
+}
+
+#compass-dial {
+  width: 72px;
+  height: 72px;
+  cursor: grab;
+  touch-action: none;
+  border-radius: 50%;
+}
+
+#compass-dial:active { cursor: grabbing; }
+#compass-dial:focus-visible { outline: 2px solid #7fb4ff; }
+
+#compass svg { width: 100%; height: 100%; display: block; }
+
+.compass-face {
+  fill: rgba(24, 28, 34, 0.88);
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 1;
+}
+
+.needle-north { fill: #e5484d; }
+.needle-south { fill: #d8dde3; }
+
+#compass text {
+  fill: #a9b3bd;
+  font-size: 9px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+#compass text.compass-n { fill: #ffffff; }
+
+#compass-turns {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+#compass-turns button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  background: rgba(24, 28, 34, 0.88);
+  color: #eef1f4;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#compass-turns button:hover { background: rgba(48, 56, 66, 0.95); }

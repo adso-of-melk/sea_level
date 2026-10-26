@@ -10,6 +10,7 @@ water can find a way in.
 - A 3D globe with real terrain that you can rotate, tilt and zoom
 - Three base maps: shaded relief, satellite and plain
 - Switches for city names, roads and borders
+- A compass: drag it to turn the map, click it to face north, or use the turn buttons
 
 Coming next: the sea level slider (0 to 70 m), then high-detail coastal data
 and rivers and lakes.
