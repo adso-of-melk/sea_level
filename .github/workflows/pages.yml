@@ -1,0 +1,45 @@
+# Publishes the app to GitHub Pages, adding the flood map tiles from the
+# "flood-data" release so they don't have to live in the repository.
+name: Publish site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add flood map tiles
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release download flood-data --pattern flood-tiles.tar.gz; then
+            tar -xzf flood-tiles.tar.gz && rm flood-tiles.tar.gz
+          else
+            echo "No flood data published yet; the slider will show no water."
+          fi
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
