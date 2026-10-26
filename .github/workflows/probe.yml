@@ -7,11 +7,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for u in \
-            "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer?f=json" \
-            "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer/tile/6/24/10" \
-            "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer/tile/12/1582/655" \
-            "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer?f=json" \
-            "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/12/1582/655" ; do
-            echo "== $u"; curl -sS -o out -w "%{http_code} %{content_type} %{size_download}\n" -H "Referer: https://adso-of-melk.github.io/" "$u"; head -c 300 out | tr -c '[:print:]\n' '.'; echo
-          done
+          curl -sS "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer?f=json" | jq -c '{min: .minLOD, max: .maxLOD, lods: [.tileInfo.lods[].level], copy: .copyrightText}'
+          for z in 13 14 15 16; do curl -sS -o /dev/null -w "z$z %{http_code} %{size_download}\n" "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer/tile/$z/$((1582*2**(z-12)))/$((655*2**(z-12)))"; done
