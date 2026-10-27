@@ -16,8 +16,6 @@ water can find a way in.
   is deeper. Flooding is worked out from Washington to Baja California.
   0 m is today's average daily high tide.
 
-Coming next: rivers and lakes.
-
 ## Using it
 
 Open the published site (see Settings → Pages in this repository for the link).
