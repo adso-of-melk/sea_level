@@ -9,7 +9,7 @@ water can find a way in.
 
 - A 3D globe with real terrain that you can rotate, tilt and zoom
 - Three base maps: shaded relief, satellite and plain
-- Switches for city names, rivers and lakes, roads and borders
+- Switches for city names, rivers and lakes, watershed boundaries, roads and borders
 - A compass: drag it to turn the map, click it to face north, or use the turn buttons
 - A sea level slider from 0 to 70 m in 10 cm steps, or type a level. Water only
   reaches places the sea could actually flow to, and is shaded darker where it
@@ -42,6 +42,7 @@ Map data:
 | Terrain, satellite | Cesium ion (Cesium World Terrain, Bing Maps) |
 | Shaded relief, roads | Esri World Hillshade and World Transportation |
 | Rivers and lakes (US only) | USGS National Hydrography Dataset |
+| Watershed boundaries (US only) | USGS Watershed Boundary Dataset |
 | City names | [Natural Earth](https://www.naturalearthdata.com/) populated places, made into `data/places.json` by `tools/make_places.mjs` |
 | Country borders | Natural Earth via [world-atlas](https://github.com/topojson/world-atlas) |
 | US state borders | US Census via [us-atlas](https://github.com/topojson/us-atlas) |

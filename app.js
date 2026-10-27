@@ -74,6 +74,22 @@ const water = layers.addImageryProvider(
   })
 );
 
+// Watershed boundaries (the drainage divides between river basins) from the
+// USGS Watershed Boundary Dataset. The service picks the level of detail for
+// the zoom, from large regions down to small subwatersheds. US only.
+const watersheds = Cesium.ImageryLayer.fromProviderAsync(
+  Cesium.ArcGisMapServerImageryProvider.fromUrl(
+    "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer",
+    {
+      layers: "1,2,3,4,5,6",
+      usePreCachedTilesIfAvailable: false,
+      tilingScheme: new Cesium.WebMercatorTilingScheme(),
+    }
+  )
+);
+watersheds.show = false;
+layers.add(watersheds);
+
 const roads = layers.addImageryProvider(
   new Cesium.UrlTemplateImageryProvider({
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
@@ -216,6 +232,7 @@ document.querySelectorAll('input[name="base"]').forEach((radio) => {
 setBaseMap(document.querySelector('input[name="base"]:checked').value);
 
 bindCheckbox("show-water", (on) => (water.show = on));
+bindCheckbox("show-watersheds", (on) => (watersheds.show = on));
 bindCheckbox("show-roads", (on) => (roads.show = on));
 bindCheckbox("show-cities", (on) => {
   cityLabels.show = on;
