@@ -64,13 +64,13 @@ function setBaseMap(name) {
 
 // ---- Overlays --------------------------------------------------------------
 
-// Rivers, streams and lakes, more of them the closer you zoom. In the US this
-// comes from the National Hydrography Dataset.
+// Rivers, streams and lakes from the USGS National Hydrography Dataset, more
+// of them the closer you zoom. It covers the US only.
 const water = layers.addImageryProvider(
   new Cesium.UrlTemplateImageryProvider({
-    url: "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer/tile/{z}/{y}/{x}",
+    url: "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/{z}/{y}/{x}",
     maximumLevel: 16,
-    credit: "Rivers and lakes: Esri, USGS, NOAA",
+    credit: "Rivers and lakes: USGS National Hydrography Dataset",
   })
 );
 

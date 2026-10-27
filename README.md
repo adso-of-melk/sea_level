@@ -40,7 +40,8 @@ Map data:
 | Layer | Source |
 | --- | --- |
 | Terrain, satellite | Cesium ion (Cesium World Terrain, Bing Maps) |
-| Shaded relief, rivers and lakes, roads | Esri World Hillshade, Hydro Reference Overlay and World Transportation |
+| Shaded relief, roads | Esri World Hillshade and World Transportation |
+| Rivers and lakes (US only) | USGS National Hydrography Dataset |
 | City names | [Natural Earth](https://www.naturalearthdata.com/) populated places, made into `data/places.json` by `tools/make_places.mjs` |
 | Country borders | Natural Earth via [world-atlas](https://github.com/topojson/world-atlas) |
 | US state borders | US Census via [us-atlas](https://github.com/topojson/us-atlas) |
