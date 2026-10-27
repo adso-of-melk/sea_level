@@ -64,6 +64,16 @@ function setBaseMap(name) {
 
 // ---- Overlays --------------------------------------------------------------
 
+// Rivers, streams and lakes, more of them the closer you zoom. In the US this
+// comes from the National Hydrography Dataset.
+const water = layers.addImageryProvider(
+  new Cesium.UrlTemplateImageryProvider({
+    url: "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer/tile/{z}/{y}/{x}",
+    maximumLevel: 16,
+    credit: "Rivers and lakes: Esri, USGS, NOAA",
+  })
+);
+
 const roads = layers.addImageryProvider(
   new Cesium.UrlTemplateImageryProvider({
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
@@ -205,6 +215,7 @@ document.querySelectorAll('input[name="base"]').forEach((radio) => {
 });
 setBaseMap(document.querySelector('input[name="base"]:checked').value);
 
+bindCheckbox("show-water", (on) => (water.show = on));
 bindCheckbox("show-roads", (on) => (roads.show = on));
 bindCheckbox("show-cities", (on) => {
   cityLabels.show = on;
