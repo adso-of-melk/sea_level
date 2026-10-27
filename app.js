@@ -112,13 +112,13 @@ function visibleBelow(rank) {
 const cityLabels = viewer.scene.primitives.add(new Cesium.LabelCollection({ scene: viewer.scene }));
 const cityDots = viewer.scene.primitives.add(new Cesium.BillboardCollection({ scene: viewer.scene }));
 
-function dotImage(size) {
+function dotImage(size, fill = "#ffffff") {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size + 2;
   const context = canvas.getContext("2d");
   context.beginPath();
   context.arc(size / 2 + 1, size / 2 + 1, size / 2, 0, 2 * Math.PI);
-  context.fillStyle = "#ffffff";
+  context.fillStyle = fill;
   context.strokeStyle = "#000000";
   context.fill();
   context.stroke();
@@ -205,6 +205,100 @@ viewer.camera.moveEnd.addEventListener(declutterCities);
 
 viewer.creditDisplay.addStaticCredit(new Cesium.Credit("City names: Natural Earth"));
 
+// Natural springs from the USGS Geographic Names Information System, loaded
+// the first time the layer is switched on. Dots show within a few hundred
+// kilometres and names only close up, never on top of each other. There are
+// thousands of springs, so each dot and name is made only once the view first
+// comes near it.
+const SPRING_DOTS_WITHIN = 3.0e5;
+const SPRING_NAMES_WITHIN = 4.0e4;
+const springDots = viewer.scene.primitives.add(new Cesium.BillboardCollection({ scene: viewer.scene }));
+const springLabels = viewer.scene.primitives.add(new Cesium.LabelCollection({ scene: viewer.scene }));
+const springDotsWithin = new Cesium.DistanceDisplayCondition(0, SPRING_DOTS_WITHIN);
+const springNamesWithin = new Cesium.DistanceDisplayCondition(0, SPRING_NAMES_WITHIN);
+const coldSpringDot = dotImage(6, "#4fc3f7");
+const hotSpringDot = dotImage(6, "#ff8a50");
+// Each entry: { position, name, hot, width, height, dot, label }.
+const springList = [];
+let springsRequested = false;
+
+function loadSprings() {
+  if (springsRequested) return;
+  springsRequested = true;
+  fetch("data/springs.json")
+    .then((response) => response.json())
+    .then((springs) => {
+      for (const [name, lon, lat, hot] of springs) {
+        const position = Cesium.Cartesian3.fromDegrees(lon, lat);
+        springList.push({ position, name, hot, width: name.length * 12 * 0.6, height: 16, dot: null, label: null });
+      }
+      updateSprings();
+    });
+}
+
+function addSpringDot(spring) {
+  spring.dot = springDots.add({
+    position: spring.position,
+    image: spring.hot ? hotSpringDot : coldSpringDot,
+    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    distanceDisplayCondition: springDotsWithin,
+    eyeOffset: nudgeToward,
+    disableDepthTestDistance: CLOSE_UP,
+  });
+}
+
+function springLabel(spring) {
+  spring.label ??= springLabels.add({
+    position: spring.position,
+    text: spring.name,
+    font: "12px system-ui, sans-serif",
+    fillColor: Cesium.Color.fromCssColorString(spring.hot ? "#ffd0b8" : "#d4f1fd"),
+    outlineColor: Cesium.Color.BLACK.withAlpha(0.85),
+    outlineWidth: 3,
+    style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+    pixelOffset: new Cesium.Cartesian2(0, -6),
+    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    distanceDisplayCondition: springNamesWithin,
+    eyeOffset: nudgeToward,
+    disableDepthTestDistance: CLOSE_UP,
+  });
+  return spring.label;
+}
+
+// Once the view settles: add dots for springs that have come into range, and
+// show each nearby spring's name unless it would overlap one already placed.
+function updateSprings() {
+  if (!springDots.show) return;
+  const camera = viewer.camera;
+  const horizon = new Cesium.EllipsoidalOccluder(Cesium.Ellipsoid.WGS84, camera.positionWC);
+  const taken = [];
+  for (const spring of springList) {
+    const distance = Cesium.Cartesian3.distance(camera.positionWC, spring.position);
+    if (!spring.dot && distance <= SPRING_DOTS_WITHIN) addSpringDot(spring);
+    let show = distance <= SPRING_NAMES_WITHIN &&
+      horizon.isPointVisible(spring.position) &&
+      viewer.scene.cartesianToCanvasCoordinates(spring.position, screenSpot) !== undefined;
+    if (show) {
+      const box = {
+        left: screenSpot.x - spring.width / 2,
+        right: screenSpot.x + spring.width / 2,
+        top: screenSpot.y - 6 - spring.height,
+        bottom: screenSpot.y + 4,
+      };
+      show = !taken.some((other) =>
+        box.left < other.right && box.right > other.left && box.top < other.bottom && box.bottom > other.top
+      );
+      if (show) taken.push(box);
+    }
+    if (show) springLabel(spring).show = true;
+    else if (spring.label) spring.label.show = false;
+  }
+}
+viewer.camera.moveEnd.addEventListener(updateSprings);
+
+viewer.creditDisplay.addStaticCredit(new Cesium.Credit("Springs: USGS GNIS"));
+
 const borderStyle = { clampToGround: true, stroke: Cesium.Color.WHITE.withAlpha(0.85), strokeWidth: 2 };
 const borders = Promise.all([
   Cesium.GeoJsonDataSource.load("data/borders-countries.geojson", borderStyle),
@@ -237,6 +331,14 @@ bindCheckbox("show-roads", (on) => (roads.show = on));
 bindCheckbox("show-cities", (on) => {
   cityLabels.show = on;
   cityDots.show = on;
+});
+bindCheckbox("show-springs", (on) => {
+  springDots.show = on;
+  springLabels.show = on;
+  if (on) {
+    loadSprings();
+    updateSprings();
+  }
 });
 bindCheckbox("show-borders", (on) =>
   borders.then((sources) => sources.forEach((source) => (source.show = on)))
