@@ -2,10 +2,22 @@ name: Probe map services
 on:
   push:
     branches: [probe-hydro]
+permissions:
+  contents: write
 jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          curl -sS "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer?f=json" | jq -c '{min: .minLOD, max: .maxLOD, lods: [.tileInfo.lods[].level], copy: .copyrightText}'
-          for z in 13 14 15 16; do curl -sS -o /dev/null -w "z$z %{http_code} %{size_download}\n" "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer/tile/$z/$((1582*2**(z-12)))/$((655*2**(z-12)))"; done
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir t
+          curl -sS "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer?f=json" | jq -c '{lods: [.tileInfo.lods[].level], wkid: .tileInfo.spatialReference.latestWkid, copy: .copyrightText}'
+          for zyx in 8/98/41 10/392/166 12/1571/665 14/6286/2662; do
+            n=$(echo $zyx | tr / _)
+            curl -sS -o t/esri_$n.png "https://tiles.arcgis.com/tiles/P3ePLMYs2RVChkJx/arcgis/rest/services/Esri_Hydro_Reference_Overlay/MapServer/tile/$zyx"
+            curl -sS -o t/usgs_$n.png -w "usgs $zyx %{http_code} %{size_download}\n" "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/$zyx"
+          done
+          tar -czf probe-tiles.tar.gz t
+          gh release view probe -R ${{ github.repository }} >/dev/null 2>&1 || gh release create probe -R ${{ github.repository }} --title probe --notes "temporary" --latest=false --target probe-hydro
+          gh release upload probe probe-tiles.tar.gz -R ${{ github.repository }} --clobber
