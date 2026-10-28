@@ -374,6 +374,14 @@ bindCheckbox("show-borders", (on) =>
   borders.then((sources) => sources.forEach((source) => (source.show = on)))
 );
 
+// Show the part of the map key for each layer only while it is switched on.
+document.querySelectorAll("#map-key [data-layer]").forEach((group) => {
+  const box = document.getElementById(group.dataset.layer);
+  const update = () => (group.hidden = !box.checked);
+  box.addEventListener("change", update);
+  update();
+});
+
 const panel = document.getElementById("panel");
 const panelToggle = document.getElementById("panel-toggle");
 panelToggle.addEventListener("click", () => {
