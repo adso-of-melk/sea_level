@@ -111,7 +111,10 @@ const watersheds = layers.addImageryProvider(
     url:
       `${WATERSHEDS}/export?bbox={westProjected},{southProjected},{eastProjected},{northProjected}` +
       "&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image" +
-      `&dynamicLayers=${encodeURIComponent(JSON.stringify(watershedStyle))}`,
+      "&dynamicLayers={style}",
+    // Filled in as a tag so Cesium percent-encodes the JSON's braces; the
+    // service rejects them if they are sent as they are.
+    customTags: { style: () => JSON.stringify(watershedStyle) },
     credit: "Watersheds: USGS Watershed Boundary Dataset",
   })
 );
