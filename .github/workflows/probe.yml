@@ -11,6 +11,13 @@ jobs:
       - env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          curl -sS "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/legend?f=json" -o hydro-legend.json
-          jq -c '[.layers[] | {layerId, layerName, n: (.legend|length)}]' hydro-legend.json | head -c 3000
-          gh release upload probe hydro-legend.json -R ${{ github.repository }} --clobber
+          mkdir h
+          for t in suisun:13/3154/1319 klamath:12/1513/661 desert:12/1622/728 delta:14/6316/2657 mtn:13/3122/1353; do
+            n=${t%%:*}; zyx=${t#*:}; z=${zyx%%/*}; rest=${zyx#*/}; y=${rest%%/*}; x=${rest#*/}
+            for dy in 0 1; do for dx in 0 1; do
+              curl -sS -o h/${n}_${dy}${dx}.png "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/$z/$((y+dy))/$((x+dx))"
+            done; done
+          done
+          curl -sS "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/legend?f=json" -o h/nhd-legend.json
+          tar -czf hydro-samples.tar.gz h
+          gh release upload probe hydro-samples.tar.gz -R ${{ github.repository }} --clobber
