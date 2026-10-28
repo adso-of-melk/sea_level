@@ -2,27 +2,20 @@ name: Probe map services
 on:
   push:
     branches: [probe-hydro]
-permissions:
-  contents: write
 jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          B=https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer
-          curl -sS "$B?f=json" | jq -c '{dyn: .supportsDynamicLayers}'
-          curl -sS "$B/0?f=json" | jq -c '{type, fields: [.fields[]?.name], labels: .hasLabels}'
-          mkdir t
-          DYN=$(jq -sRr @uri dyn.json)
-          # wide (~250 km) and close (~30 km) views around Sacramento
-          for v in "wide -13650000,4570000,-13400000,4720000" "close -13540000,4650000,-13510000,4668000"; do
-            set -- $v
-            curl -sS -o t/old_$1.png -w "old $1 %{http_code} %{content_type}\n" "$B/export?bbox=$2&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image&layers=show:1,2,3,4,5,6"
-            curl -sS -o t/new_$1.png -w "new $1 %{http_code} %{content_type}\n" "$B/export?bbox=$2&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image&dynamicLayers=$DYN"
-          done
-          head -c 300 t/new_wide.png | tr -c '[:print:]' '.'; echo
-          tar -czf wbd.tar.gz t
-          gh release upload probe wbd.tar.gz -R ${{ github.repository }} --clobber
+      - run: |
+          while read -r u; do
+            curl -sS -D h.txt -o out.bin -H "Origin: https://adso-of-melk.github.io" -w "code %{http_code} %{content_type} %{size_download}\n" "$u"
+            grep -i "access-control" h.txt || echo "no CORS header"
+            head -c 300 out.bin | tr -c '[:print:]' '.'; echo
+          done < urls.txt
+          echo "== same with braces encoded"
+          u=$(head -1 urls.txt | sed 's/{/%7B/g; s/}/%7D/g')
+          curl -sS -o out.bin -w "code %{http_code} %{content_type} %{size_download}\n" "$u"; head -c 300 out.bin | tr -c '[:print:]' '.'; echo
+          echo "== old style for comparison"
+          curl -sS -D h.txt -o out.bin -H "Origin: https://adso-of-melk.github.io" -w "code %{http_code} %{content_type} %{size_download}\n" "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/export?bbox=0,0,20037508.342789244,20037508.342789244&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:1,2,3,4,5,6"
+          grep -i "access-control" h.txt || echo "no CORS header"
