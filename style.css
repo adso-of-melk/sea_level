@@ -176,3 +176,51 @@ html, body, #globe {
 }
 
 #flood-status { margin-top: 6px; }
+
+/* Map key: folds away inside the panel; each layer's part shows only while
+   that layer is switched on. */
+#map-key { margin-top: 4px; }
+
+#map-key summary {
+  color: #a9b3bd;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+#map-key h2 {
+  margin: 10px 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.key-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.key-row svg {
+  flex: none;
+  width: 28px;
+  height: 14px;
+}
+
+.key-depth {
+  height: 10px;
+  border-radius: 3px;
+  background: linear-gradient(to right, rgb(150, 215, 250), rgb(20, 80, 170));
+}
+
+.key-depth-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #a9b3bd;
+  font-size: 11px;
+}
+
+#map-key .note { margin-top: 2px; }
