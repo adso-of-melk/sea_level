@@ -75,20 +75,47 @@ const water = layers.addImageryProvider(
 );
 
 // Watershed boundaries (the drainage divides between river basins) from the
-// USGS Watershed Boundary Dataset. The service picks the level of detail for
-// the zoom, from large regions down to small subwatersheds. US only.
-const watersheds = Cesium.ImageryLayer.fromProviderAsync(
-  Cesium.ArcGisMapServerImageryProvider.fromUrl(
-    "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer",
-    {
-      layers: "1,2,3,4,5,6",
-      usePreCachedTilesIfAvailable: false,
-      tilingScheme: new Cesium.WebMercatorTilingScheme(),
-    }
-  )
+// USGS Watershed Boundary Dataset, US only. Each level of detail, from large
+// regions down to small subwatersheds, shows over its own range of zoom. The
+// service is asked to draw them as brown dotted lines, thinner for smaller
+// watersheds, and without its code labels.
+const WATERSHEDS = "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer";
+const watershedLevels = [
+  // [service layer, shown from scale, shown to scale, line width]
+  [1, 110000000, 0, 2.8],
+  [2, 13866974, 8000000, 2.6],
+  [3, 8000000, 2000000, 2.4],
+  [4, 2000000, 866686, 2.2],
+  [5, 866687, 433343, 2.0],
+  [6, 433346, 0, 1.8],
+];
+const watershedStyle = watershedLevels.map(([id, minScale, maxScale, width]) => ({
+  id,
+  source: { type: "mapLayer", mapLayerId: id },
+  minScale,
+  maxScale,
+  drawingInfo: {
+    renderer: {
+      type: "simple",
+      symbol: {
+        type: "esriSFS",
+        style: "esriSFSNull",
+        outline: { type: "esriSLS", style: "esriSLSDot", color: [120, 80, 45, 230], width },
+      },
+    },
+    showLabels: false,
+  },
+}));
+const watersheds = layers.addImageryProvider(
+  new Cesium.UrlTemplateImageryProvider({
+    url:
+      `${WATERSHEDS}/export?bbox={westProjected},{southProjected},{eastProjected},{northProjected}` +
+      "&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image" +
+      `&dynamicLayers=${encodeURIComponent(JSON.stringify(watershedStyle))}`,
+    credit: "Watersheds: USGS Watershed Boundary Dataset",
+  })
 );
 watersheds.show = false;
-layers.add(watersheds);
 
 const roads = layers.addImageryProvider(
   new Cesium.UrlTemplateImageryProvider({
