@@ -9,13 +9,13 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           while read -r u; do
-            curl -sS -D h.txt -o out.bin -H "Origin: https://adso-of-melk.github.io" -w "code %{http_code} %{content_type} %{size_download}\n" "$u"
+            curl -g -sS -D h.txt -o out.bin -H "Origin: https://adso-of-melk.github.io" -w "code %{http_code} %{content_type} %{size_download}\n" "$u"
             grep -i "access-control" h.txt || echo "no CORS header"
             head -c 300 out.bin | tr -c '[:print:]' '.'; echo
           done < urls.txt
           echo "== same with braces encoded"
           u=$(head -1 urls.txt | sed 's/{/%7B/g; s/}/%7D/g')
-          curl -sS -o out.bin -w "code %{http_code} %{content_type} %{size_download}\n" "$u"; head -c 300 out.bin | tr -c '[:print:]' '.'; echo
+          curl -g -sS -o out.bin -w "code %{http_code} %{content_type} %{size_download}\n" "$u"; head -c 300 out.bin | tr -c '[:print:]' '.'; echo
           echo "== old style for comparison"
-          curl -sS -D h.txt -o out.bin -H "Origin: https://adso-of-melk.github.io" -w "code %{http_code} %{content_type} %{size_download}\n" "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/export?bbox=0,0,20037508.342789244,20037508.342789244&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:1,2,3,4,5,6"
+          curl -g -sS -D h.txt -o out.bin -H "Origin: https://adso-of-melk.github.io" -w "code %{http_code} %{content_type} %{size_download}\n" "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/export?bbox=0,0,20037508.342789244,20037508.342789244&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:1,2,3,4,5,6"
           grep -i "access-control" h.txt || echo "no CORS header"
