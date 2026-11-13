@@ -1,4 +1,6 @@
-# Sea Level Globe
+# Consonance Map
+
+Jeremy's private version of the sea level globe, with lines you can draw and keep.
 
 A 3D globe of the Earth's terrain, focused on the US west coast, where you can
 raise the sea level and see which places the ocean would actually reach.
@@ -11,6 +13,8 @@ water can find a way in.
 - Three base maps: shaded relief, satellite and plain
 - Switches for city names, rivers and lakes, natural springs, watershed boundaries, roads and borders
 - A compass: drag it to turn the map, click it to face north, or use the turn buttons
+- My lines: draw your own lines (borders, routes, anything) on the map, name
+  them, colour them, fly to them and delete them. They are kept for good (see below).
 - A sea level slider from 0 to 70 m in 10 cm steps, or type a level. Water only
   reaches places the sea could actually flow to, and is shaded darker where it
   is deeper. Flooding is worked out from Washington to Baja California.
@@ -21,6 +25,31 @@ water can find a way in.
 Open the published site (see Settings → Pages in this repository for the link).
 Drag to rotate, scroll or pinch to zoom, and right-drag or two-finger drag to tilt.
 
+## Drawing lines
+
+Open the panel, press **Draw a line**, then click or tap the map for each
+point. Double-click, or press **Finish**, to end the line; **Undo point** takes
+back the last point and **Cancel** (or Esc) throws the line away. Type a name
+next to the line in the list; deleting needs two presses so one slip can't
+lose a line.
+
+Lines are saved in the browser as soon as you draw them. To have the same lines
+on every device (phone, laptop, another browser), they can also be saved to a
+private GitHub repository:
+
+1. On GitHub, make a new **private** repository called `consonance-lines`
+   (github.com/new, choose Private, tick "Add a README file").
+2. Make a token: github.com/settings/personal-access-tokens/new. Give it a
+   name, pick an expiry, choose **Only select repositories** and pick
+   `consonance-lines`, then under **Repository permissions** set
+   **Contents** to **Read and write**. Generate it and copy it.
+3. In the app, open **My lines → Keep lines on all my devices**, paste the
+   token and press **Save token**. Do this once on each device.
+
+Lines already drawn on that device are added to the ones on GitHub. **Download
+a backup** saves all lines as a GeoJSON file, and **Load from file** adds the
+lines from such a file.
+
 ## Settings
 
 `config.js` holds the settings you may want to change:
@@ -29,6 +58,7 @@ Drag to rotate, scroll or pinch to zoom, and right-drag or two-finger drag to ti
   terrain and satellite imagery. Without it the app uses Cesium's shared demo
   token and shows a warning banner.
 - `START_VIEW`: the area the globe opens on.
+- `LINES_REPO`: the private repository that keeps your lines (`adso-of-melk/consonance-lines`).
 
 ## How it is built
 

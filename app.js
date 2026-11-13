@@ -1,4 +1,4 @@
-// Sea Level Globe: a 3D globe with real terrain and switchable map layers.
+// Consonance Map: a 3D globe with real terrain and switchable map layers.
 
 if (window.CESIUM_ION_TOKEN) {
   Cesium.Ion.defaultAccessToken = window.CESIUM_ION_TOKEN;

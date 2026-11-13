@@ -224,3 +224,97 @@ html, body, #globe {
 }
 
 #map-key .note { margin-top: 2px; }
+
+/* My lines */
+#panel button {
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#panel button:hover { background: rgba(255, 255, 255, 0.16); }
+#panel button:disabled { opacity: 0.45; cursor: default; }
+#panel button.wide { width: 100%; box-sizing: border-box; margin: 4px 0; padding: 6px 8px; }
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+#draw-bar {
+  margin: 4px 0;
+  padding: 8px;
+  border: 1px solid #ffcc33;
+  border-radius: 6px;
+}
+
+#lines-list {
+  margin: 4px 0;
+  padding: 0;
+  list-style: none;
+}
+
+#lines-list li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+}
+
+#lines-list input[type="color"] {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+#lines-list button { flex: none; }
+
+#lines-list .line-name,
+#github-token {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+}
+
+#github-token { flex: none; width: 100%; box-sizing: border-box; margin: 6px 0; }
+
+#lines-list button.confirm { border-color: #e5484d; color: #ffb3b5; }
+
+#lines-status:empty { display: none; }
+
+#lines-sync { margin-top: 6px; }
+
+#lines-sync summary {
+  color: #a9b3bd;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#lines-sync .note { margin: 6px 0; }
+
+#panel label.file-button {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+}
