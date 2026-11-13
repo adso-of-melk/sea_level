@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sea Level Globe</title>
+  <title>Consonance Map</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.145.0/Build/Cesium/Widgets/widgets.css">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/cesium@1.145.0/Build/Cesium/Cesium.js"></script>
@@ -14,7 +14,7 @@
 
   <aside id="panel">
     <button id="panel-toggle" type="button" aria-expanded="true" aria-controls="panel-body">
-      <span>Sea Level Globe</span><span class="chevron" aria-hidden="true"></span>
+      <span>Consonance Map</span><span class="chevron" aria-hidden="true"></span>
     </button>
     <div id="panel-body">
 
@@ -42,6 +42,39 @@
         <p class="note" id="flood-status">Loading flood data…</p>
       </fieldset>
 
+      <fieldset id="my-lines">
+        <legend>My lines</legend>
+        <label><input type="checkbox" id="show-lines" checked> Show my lines</label>
+        <button id="draw-line" type="button" class="wide">Draw a line</button>
+        <div id="draw-bar" hidden>
+          <p class="note" id="draw-hint"></p>
+          <div class="button-row">
+            <button id="draw-undo" type="button">Undo point</button>
+            <button id="draw-finish" type="button">Finish</button>
+            <button id="draw-cancel" type="button">Cancel</button>
+          </div>
+        </div>
+        <p class="note" id="lines-empty">No lines yet.</p>
+        <ul id="lines-list"></ul>
+        <p class="note" id="lines-status" aria-live="polite"></p>
+        <details id="lines-sync">
+          <summary>Keep lines on all my devices</summary>
+          <div id="sync-off">
+            <p class="note">Right now lines are kept only in this browser. To keep them on every device, paste a GitHub token for <span id="sync-repo"></span> here, once on each device.</p>
+            <input type="password" id="github-token" placeholder="GitHub token" autocomplete="off" aria-label="GitHub token">
+            <button id="save-token" type="button">Save token</button>
+          </div>
+          <div id="sync-on" hidden>
+            <p class="note">This device saves lines to GitHub, so your other devices with the token see them too.</p>
+            <button id="forget-token" type="button">Stop saving to GitHub on this device</button>
+          </div>
+          <div class="button-row">
+            <button id="download-lines" type="button">Download a backup</button>
+            <label class="file-button">Load from file<input type="file" id="load-lines" accept=".geojson,.json,application/geo+json,application/json" hidden></label>
+          </div>
+        </details>
+      </fieldset>
+
       <details id="map-key">
         <summary>Map key</summary>
         <div class="key-group">
@@ -65,6 +98,10 @@
         <div class="key-group" data-layer="show-watersheds">
           <h2>Watershed boundaries</h2>
           <div class="key-row"><svg viewBox="0 0 28 14"><path d="M1 7h26" stroke="#9a6a40" stroke-width="2" stroke-dasharray="1.5 2.5" stroke-linecap="round"/></svg>Divide between river basins; thicker lines for larger basins</div>
+        </div>
+        <div class="key-group" data-layer="show-lines">
+          <h2>My lines</h2>
+          <div class="key-row"><svg viewBox="0 0 28 14"><path d="M1 7h26" stroke="#ffcc33" stroke-width="3"/></svg>Lines you drew, in the colour you chose</div>
         </div>
         <div class="key-group" data-layer="show-cities">
           <h2>City names</h2>
@@ -97,5 +134,6 @@
   <script src="app.js"></script>
   <script src="compass.js"></script>
   <script src="flood.js"></script>
+  <script src="lines.js"></script>
 </body>
 </html>
